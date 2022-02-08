@@ -1,6 +1,8 @@
 const { response } = require("./lib/response")
 const { getCurrentConditions } = require("./lib/accuWeather")
 const constants = require("./lib/constants")
+const { keys } = require("./test/sample.data")
+const { sendToBigPanda } = require("./lib/bigPanda")
 
 /*
 	mmcgeeAccuWeather
@@ -12,23 +14,29 @@ const constants = require("./lib/constants")
 */
 
 exports.handler = async (event) => {
-	// console.log(`handler:event: ${JSON.stringify(event)}`)
+	console.log(`handler:event: ${JSON.stringify(event)}`)
 
 	let accuWeatherResponse = {}
+	let bigPandaResponse = {}
 
-	try {
-		if(!!event) {
-			try {
-				accuWeatherResponse = await getCurrentConditions(event?.locationId)
-			} catch (e) {
-				console.error(e)
-			}
+	/* -----  Get AccuWeather data from the AccuWeather API ----- */
+	if(!!event) {
+		try {
+			accuWeatherResponse = await getCurrentConditions(event)
+		} catch (e) {
+			console.error(e)
 		}
-	} catch (e) {
-		console.error(e)
 	}
 
-	
-	
-	return response(accuWeatherResponse)
+	/* -----   Send AccuWeather data to the BigPanda API  ----- */
+	if(Object.keys(accuWeatherResponse).length > 0) {
+		try {
+			bigPandaResponse = await sendToBigPanda(accuWeatherResponse)
+		} catch (e) {
+			console.error(e)
+		}
+	}
+
+	// return response(accuWeatherResponse)
+	return response(bigPandaResponse)
 }
