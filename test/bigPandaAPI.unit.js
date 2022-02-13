@@ -1,22 +1,24 @@
 const { assert, expect } = require("chai");
 const dotenv = require("dotenv")
-const constants = require("../lib/constants")
-const sampleData = require("./sample.data")
+const constants = require("../data/constants")
+const sampleData = require("../data/sample.data")
 
-const { sendToBigPanda, randomStatus } = require("../lib/bigPanda")
+// const { sendToBigPanda, randomStatus } = require("../lib/bigPanda")
+const { sendToBigPanda } = require("../lib/bigPanda")
+const { randomStatus } = require("../lib/util")
 
 dotenv.config()
 
 describe("BigPanda API Integration Unit Tests", () => {
 	if(true) {
 		it("lib/bigPanda.js > sendToBigPanda", async () => {
-			// console.log(sampleData)
-			const sentToBigPanda = await sendToBigPanda(sampleData)
-			console.log('results:')
-			console.log(sentToBigPanda)
-			// console.log(JSON.stringify(sentToBigPanda, null, 4))
+			const fromBigPanda = await sendToBigPanda(sampleData)
+			console.log(fromBigPanda)
 			try {
-				assert.isArray(sentToBigPanda)
+				assert.isNotNull(fromBigPanda)
+				assert.isArray(fromBigPanda)
+				assert.isNumber(fromBigPanda[0].statusCode)
+				assert.isObject(fromBigPanda[0].data)
 
 			} catch (e) {
 				assert.fail(e)
@@ -24,7 +26,7 @@ describe("BigPanda API Integration Unit Tests", () => {
 		})
 	}
 
-	if(false) {
+	if(true) {
 		it("lib/bigPanda.js > randomStatus", () => {
 			const statusReturned = randomStatus('Mostly Sunny')
 			console.log(`results: ${statusReturned}`)

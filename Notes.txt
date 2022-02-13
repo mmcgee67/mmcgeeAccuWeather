@@ -1,0 +1,66 @@
+ `
+Technical Solutions Engineer
+Custom Integration Technical Challenge
+         
+Introduction
+This technical exercise requires you to build a custom integration to request the current weather conditions from AccuWeather and push the details as “alerts” into BigPanda.  Due to the nature of weather conditions, there will be many commonalities between the alerts for neighboring areas which can be used to correlate them into single “incidents”. 
+
+The first goal of the exercise is to build a solid integration using sound development techniques and best practices, but also to use custom tags, enrichments, and correlation rules to reduce the noise of the conditions between different locations.
+
+The second goal is to implement a message queue for the alerts being sent to BigPanda.  BigPanda’s core architecture leverages queues throughout the data pipeline to enable asynchronous processing of requests, ensure data integrity and reliable delivery, and allow for seamless scalability.  Understanding of queue handling and methodologies is one of the key aspects for a BigPanda TSE.
+ 
+Part 1 - Integrate AccuWeather to BigPanda
+ 
+Exercise Goals 
+1.	Build the custom integration using AccuWeather and BigPanda APIs (see Reference section for API details and access info).
+2.	Include some method of basic unit testing to check for bugs or incorrect logic in the code.
+3.	Verify the alerts are properly received in your account and showing up in the BigPanda Console.
+4.	Use the Custom Tag Editor to extract the zip code from the link field, and use the Correlation Editor to correlate the alerts by zip code.
+Integration Implementation
+●	Languages: NodeJS (preferred) / Python / Java
+●	Apply Object Oriented Design principles and best practices to ensure the code is not just functionally correct but has logical flow and structure (e.g. - no endless string of nested callbacks) and promotes readability and reusability
+●	Where possible, make the logic generic rather than specific only to the location codes listed in the Reference section
+●	Handle possible exceptions / errors that may return from the AccuWeather and BigPanda APIs or other potential runtime errors
+●	Add comments to the code to describe the logic
+●	Feel free to expand on these requirements to make the integration more functional, more robust, or just generally more interesting.  Don’t be afraid to get creative 😀
+ 
+Part 2 - Implement Queue for Alerts to BigPanda
+ 
+Exercise Goals 
+1.	Implement a Message Queue to receive alert requests from the integration built in Part 1.
+2.	Update the custom integration from Part 1 to push the weather data to the queue instead of directly to BigPanda.
+3.	Build a service in NodeJS which will run separately from the integration built in Part 1.  This service should receive messages from the queue and post the corresponding alert to BigPanda.
+4.	If an error response / timeout is received from BigPanda or other error occurs, return the message to the queue for retry.  The message should go to the back of the queue, and/or a limited number of retry attempts should be enforced to avoid blocking new messages from being processed.
+5.	(Optional Bonus) Set a maximum retry limit for the queue and, if the number of attempts is exceeded, push the message to a “Dead Letter Queue” (DLQ) for later troubleshooting.  For more bonus points, include a method for automatically retrying from the DLQ.
+Integration Implementation
+●	Feel free to implement the Message Queue using whatever tools you prefer.  You can use a node library like better-queue (which supports PostgreSQL, MySQL, and memory-based storage) or bull (a Redis-backed queue library).  You may also use a hosted message queue service such as Amazon Simple Queue Service (SQS) or CloudAMQP.
+●	As in Part 1, be sure to include proper error handling, add comments to explain the logic, and genericize where possible
+Reference
+ 
+APIs
+●	AccuWeather API Info: https://developer.accuweather.com/apis
+●	Current Condition API Parameters:
+○	ApiKey: Q7FmHNhcT9oLhLirPaixbz5WFmgThFEz
+○	LocationKey - used by the API to determine which area to query.  One location can have multiple location keys, e.g.:
+■	San Francisco: 347629, 113032, 261737, 3409211, 262723
+■	New York: 349727, 710949, 2531279, 2245721, 2212053
+■	Chicago: 348308, 2249562, 1162619, 1169367, 1068089
+●	Interactive Example Page - use this to test the API: https://developer.accuweather.com/accuweather-current-conditions-api/apis/get/currentconditions/v1/%7BlocationKey%7D
+●	Local Weather Conditions API Endpoint: https://dataservice.accuweather.com/currentconditions/v1/{locationkey}
+
+BigPanda Account
+●	Customer Success has sent you an email invite or will send one shortly. Please be sure to activate within 24 hours of receiving the invite as the link will expire
+●	Go to the Integrations tab in the BigPanda Console and create a new REST API to generate the app_key required to be submitted with BP alert payloads
+BigPanda Alert Payload Example
+{
+  "app_key": <REST API App Key>,
+  "host": "Alaska", // location name from response 
+  "check": "Weather Check", // constant value to recognize this check
+  "incident_identifier": 115130, // the locationkey as a uid for the alert
+  "description": "79.64 km/h", // relevant metric info
+  "condition": "Mostly cloudy", // WeatherText info
+  "link": "http://www.accuweather.com/en/us/new-york-nm/87007/..." // the link,
+  ... // Add custom field info as you see fit
+}
+
+

@@ -1,11 +1,8 @@
 const { assert, expect } = require("chai");
 const dotenv = require("dotenv")
-const constants = require("../lib/constants")
-const sampleData = require("./sample.data")
-const {
-	getLocationId,
-	getCurrentConditions
- } = require("../lib/accuWeather")
+const constants = require("../data/constants")
+const sampleData = require("../data/sample.data")
+const { getLocationId, getCurrentConditions } = require("../lib/accuWeatherChallengeLib.js")
 
 dotenv.config()
 
@@ -13,7 +10,7 @@ describe("AccuWeather API Integration Unit Tests", () => {
 
 
 		it("lib/accuWeather.js/getLocationId", async () => {
-			if(false) {
+			if(true) {
 				try {
 					const locationId = await getLocationId(constants.DEFAULT_LOCATION_ID);
 					assert.isNotNull(locationId)
@@ -27,7 +24,7 @@ describe("AccuWeather API Integration Unit Tests", () => {
 		}), 
 
 	it("lib/accuWeather.js > getLocationId", async () => {
-		if(false) {
+		if(true) {
 			try {
 				const locationId = await getLocationId(constants.DEFAULT_LOCATION_ID_LIST);
 				assert.isNotNull(locationId)
@@ -42,14 +39,14 @@ describe("AccuWeather API Integration Unit Tests", () => {
 
 	it("lib/accuWeather.js > getCurrentConditions", async () => {
 		if(true) {
+			const currentConditions = await getCurrentConditions(constants.DEFAULT_LOCATION_ID_LIST);
+			console.log(currentConditions)
 			try {
-				const currentConditions = await getCurrentConditions(constants.DEFAULT_LOCATION_ID_LIST);
-				console.log(currentConditions)
 				assert.isNotNull(currentConditions)
 				assert.isArray(currentConditions)
 				assert.isNotNull(currentConditions[0])
 				assert.isObject(currentConditions[0])
-				assert.isNumber(currentConditions[0].status)
+				assert.isNumber(currentConditions[0].statusCode)
 				assert.isNotNull(currentConditions[0].WeatherText)
 				assert.isString(currentConditions[0].WeatherText)
 			} catch (e) {

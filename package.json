@@ -4,9 +4,10 @@
   "description": "Package to request AccuWeather current conditions",
   "main": "index.js",
   "scripts": {
-    "test": "mocha test/*.test.js --timeout 5000",
-    "bigpanda": "mocha test/bigPandaAPI.unit.js --timeout 5000",
-    "accuweather": "mocha test/accuWeatherAPI.unit.js --timeout 5000"
+    "tests": "mocha test/*.test.js --timeout 60000",
+    "testsqs": "mocha test/sqs.unit.js --timeout 60000",
+    "testbigpanda": "mocha test/bigPandaAPI.unit.js --timeout 60000",
+    "testaccuweather": "mocha test/accuWeatherAPI.unit.js --timeout 60000"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,7 @@
   "license": "ISC",
   "dependencies": {
     "async": "^3.2.3",
+    "aws-sdk": "^2.1072.0",
     "axios": "^0.25.0",
     "dotenv": "^16.0.0"
   },

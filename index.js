@@ -1,42 +1,42 @@
-const { response } = require("./lib/response")
-const { getCurrentConditions } = require("./lib/accuWeather")
-const constants = require("./lib/constants")
-const { keys } = require("./test/sample.data")
-const { sendToBigPanda } = require("./lib/bigPanda")
+// local libraries
+const {
+	accuWeatherToBigPanda,
+	accuWeatherToSqs,
+	sqsToBigPanda, 
+	response
+} = require("./lib/accuWeatherChallengeLib")
 
 /*
-	mmcgeeAccuWeather
-
 	This is a package created as part of a coding challenge.  See NOTES.txt for details.
-
-	This package will query the AccuWeather APIs for a given location...
-
+	This package will query the AccuWeather APIs for a given location and send them to
+	BigPanda
 */
 
-exports.handler = async (event) => {
-	console.log(`handler:event: ${JSON.stringify(event)}`)
+exports.handler = (event) => {
+	console.log('event: ' + JSON.stringify(event))
+	console.log('isArray: ' + Array.isArray(event))
+	console.log('typeof: ' + typeof event)
 
-	let accuWeatherResponse = {}
-	let bigPandaResponse = {}
-
-	/* -----  Get AccuWeather data from the AccuWeather API ----- */
-	if(!!event) {
-		try {
-			accuWeatherResponse = await getCurrentConditions(event)
-		} catch (e) {
-			console.error(e)
+	if( Array.isArray(event) && event.every( e => typeof e === 'number') )
+	{
+		if( process.env.CHALLENGE === 'ACCUWEATHER_TO_BIGPANDA' ) {
+			console.log('AccuWeather to BigPanda')
+			// Query AccuWeather and send to BigPanda 
+			return accuWeatherToBigPanda(event)
+		} else
+		if( process.env.CHALLENGE === 'ACCUWEATHER_TO_SQS' ) {
+			console.log('AccuWeather to SQS')
+			// Get AccuWeather and send to AWS SQS
+			return accuWeatherToSqs(event)
 		}
+	} else 
+	if(typeof event === 'object') {
+		console.log('SQS to BigPanda')
+		// This function is expected to be invoked by an AWS SQS in response to
+		// messages being place in the queue.
+		return sqsToBigPanda(event)
+	} else {
+		console.log('Not a valid invocation')
+		return response({})
 	}
-
-	/* -----   Send AccuWeather data to the BigPanda API  ----- */
-	if(Object.keys(accuWeatherResponse).length > 0) {
-		try {
-			bigPandaResponse = await sendToBigPanda(accuWeatherResponse)
-		} catch (e) {
-			console.error(e)
-		}
-	}
-
-	// return response(accuWeatherResponse)
-	return response(bigPandaResponse)
 }
